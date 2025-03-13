@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { VersionData } from '../../tools/parser/types';
-import { versionParser } from '../../tools/parser/parser';
+import { VersionData } from '../../utils/parser/types';
+import { versionParser } from '../../utils/parser/parser';
 import Modal from '../modal';
 import Title from './title';
 import VersionItem from './items';
 import AscendingImg from '../../assets/sortAscending.svg';
 import DescendingImg from '../../assets/sortDescending.svg';
 import Pagination from '../pagination';
+import { setSearchParams } from '../../utils/searchParams';
 
 interface DetailModalProps {
     modalOpen: boolean;
@@ -51,7 +52,13 @@ const DetailModal: React.FC<DetailModalProps> = ({
         setItemOffset(0);
     }, [originVersion, mappedVersion]);
     return (
-        <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal
+            isOpen={modalOpen}
+            onClose={() => {
+                setModalOpen(false);
+                setSearchParams('pkg', '');
+            }}
+        >
             <div className="flex h-full flex-col">
                 <Title name={name} version={version} setVersion={setVersion} />
                 <div className="relative h-full overflow-auto px-4 pb-3">

@@ -2,38 +2,53 @@ import { useEffect, useMemo, useState } from 'react';
 import Header from './layout/header';
 import List from './components/list/list';
 import Search from './components/search';
-import { titleParser } from './tools/parser/parser';
-import { VersionData } from './tools/parser/types';
+import { titleParser } from './utils/parser/parser';
+import { VersionData } from './utils/parser/types';
 import Pagination from './components/pagination';
-import './App.css';
 import { Tooltip } from 'react-tooltip';
+import { getVersionData } from './utils/getLLPkgstore';
+import { getSearchParams } from './utils/searchParams';
+import toast, { Toaster } from 'react-hot-toast';
+import './App.css';
 
 function App() {
     const [search, setSearch] = useState('');
     const [data, setData] = useState<VersionData>();
     const [itemOffset, setItemOffset] = useState(0);
+    const searchQuery = getSearchParams('search');
     const pageSize = 4;
     const searchResult = useMemo(
         () => titleParser(data, search, itemOffset, pageSize),
         [data, search, itemOffset],
     );
     useEffect(() => {
-        getVersionData().then((data) => {
-            setData(data);
-        });
+        getVersionData().then(
+            (data) => {
+                setData(data);
+            },
+            (error) => {
+                toast.error(error.message);
+            },
+        );
     }, []);
+    useEffect(() => {
+        if (searchQuery) {
+            setSearch(searchQuery);
+        }
+    }, [searchQuery]);
     useEffect(() => {
         setItemOffset(0);
     }, [search]);
     return (
         <>
             <Tooltip id="default-tooltip" />
+            <Toaster />
             <Header />
             <Search
                 query={search}
                 setSearch={setSearch}
-                dataNumber={data ? Object.keys(data).length : 0}
-                resultNumber={searchResult.totalCount}
+                totalPackages={data ? Object.keys(data).length : 0}
+                totalResults={searchResult.totalCount}
             />
             <List data={data} titles={searchResult.data} />
             <Pagination
@@ -45,17 +60,6 @@ function App() {
             />
         </>
     );
-}
-
-async function getVersionData(): Promise<VersionData> {
-    const response = await fetch('./llpkgstore.json', {
-        method: 'GET',
-        headers: {
-            'Cache-Control': 'no-cache',
-        },
-    });
-    const data = await response.json();
-    return data;
 }
 
 export default App;

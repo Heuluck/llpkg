@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Item from './items';
-import { VersionData } from '../../tools/parser/types';
+import { VersionData } from '../../utils/parser/types';
 import DetailModal from '../detail/detail';
+import { getSearchParams, setSearchParams } from '../../utils/searchParams';
+import toast from 'react-hot-toast';
 
 interface ListProps {
     data?: VersionData;
@@ -11,6 +13,16 @@ interface ListProps {
 const List: React.FC<ListProps> = ({ data, titles }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [name, setDetailName] = useState<string>();
+    const pkgQuery = getSearchParams('pkg');
+    useEffect(() => {
+        if (data && pkgQuery && pkgQuery in data) {
+            setDetailName(pkgQuery);
+            setModalOpen(true);
+        } else if (data && pkgQuery && !(pkgQuery in data)) {
+            toast.error(`Cannot found package named "${pkgQuery}"`);
+            setSearchParams('pkg', '');
+        }
+    }, [pkgQuery, data]);
     return (
         <>
             <DetailModal
@@ -21,12 +33,12 @@ const List: React.FC<ListProps> = ({ data, titles }) => {
             />
             {data ? (
                 <div className="grid grid-cols-1 gap-4 px-8 py-8 text-gray-600 md:px-32 md:py-16 lg:grid-cols-2">
-                    {titles.map((key, index) => {
+                    {titles.map((name, index) => {
                         return (
                             <Item
-                                key={key}
-                                name={key}
-                                data={data[key]}
+                                key={name}
+                                name={name}
+                                data={data[name]}
                                 index={index}
                                 setInfo={setDetailName}
                                 setModalOpen={setModalOpen}
