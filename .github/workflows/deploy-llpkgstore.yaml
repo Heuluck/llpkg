@@ -1,10 +1,12 @@
 name: Build and Deploy LLPkgStore artifact
 
 on:
-    workflow_run:
-        workflows: [Build and Upload LLPkgStore artifact]
-        types: [completed]
-        branches: [website]
+  push:
+    branches: [website]
+
+permissions:
+  pages: write
+  id-token: write
 
 jobs:
     build-and-upload:
