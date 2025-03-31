@@ -3,8 +3,9 @@ import AscendingImg from '@/assets/sortAscending.svg';
 import DescendingImg from '@/assets/sortDescending.svg';
 import Pagination from '@/components/Pagination';
 import { versionParser } from '@/utils/parser';
-import { VersionData } from '@/utils/parser/types';
+import { LLPkgStore } from '@/utils/parser/types';
 import { setSearchParams } from '@/utils/searchParams';
+import { paginationSize } from '@/config/pagination';
 import Modal from '../Modal';
 import Title from './Title';
 import VersionItem from './Items';
@@ -13,7 +14,7 @@ interface DetailModalProps {
     modalOpen: boolean;
     setModalOpen: (open: boolean) => void;
     name?: string;
-    data?: VersionData;
+    data?: LLPkgStore;
 }
 
 const DetailModal: React.FC<DetailModalProps> = ({
@@ -25,9 +26,9 @@ const DetailModal: React.FC<DetailModalProps> = ({
     const [originVersion, setOriginVersion] = useState('');
     const [mappedVersion, setMappedVersion] = useState('');
     const [itemOffset, setItemOffset] = useState(0);
-    const [desc, setDesc] = useState(false);
+    const [desc, setDesc] = useState(true);
     const [version, setVersion] = useState('latest');
-    const pageSize = 10;
+    const pageSize = paginationSize.version;
     const searchResult = useMemo(
         () =>
             data &&
@@ -40,12 +41,13 @@ const DetailModal: React.FC<DetailModalProps> = ({
                 pageSize,
                 desc,
             ),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [data, originVersion, mappedVersion, desc, name, itemOffset],
     );
 
     useEffect(() => {
         setItemOffset(0);
-        setDesc(false);
+        setDesc(true);
         setVersion('latest');
     }, [name]);
 
@@ -64,7 +66,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
             <div className="flex h-full flex-col">
                 <Title name={name} version={version} setVersion={setVersion} />
                 <div className="relative h-full overflow-auto px-4 pb-3">
-                    {searchResult ? (
+                    {data && name && searchResult ? (
                         <>
                             <div className="sticky top-1 mt-5 mb-1 flex flex-row justify-around text-base">
                                 <div className="mb-2 flex w-full items-center gap-2 overflow-hidden rounded-lg border border-gray-300 bg-white/70 px-2 backdrop-blur-xs sm:w-fit">
@@ -100,12 +102,13 @@ const DetailModal: React.FC<DetailModalProps> = ({
                                     </span>
                                 </button>
                             </div>
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-3">
                                 {searchResult.data.map((ver, index) => {
                                     return (
                                         <VersionItem
                                             key={index}
-                                            ver={ver}
+                                            cver={ver}
+                                            gover={data[name].versions[ver]}
                                             setVersion={setVersion}
                                         />
                                     );

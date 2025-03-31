@@ -6,19 +6,21 @@ import Pagination from '@/components/Pagination';
 import Search from '@/components/Search';
 import Header from '@/layout/Header';
 import { getVersionData } from '@/utils/getLLPkgstore';
-import { titleParser } from '@/utils/parser';
-import { VersionData } from '@/utils/parser/types';
+import { pkgnameParser } from '@/utils/parser';
+import { LLPkgStore } from '@/utils/parser/types';
 import { getSearchParams } from '@/utils/searchParams';
+import { paginationSize } from '@/config/pagination';
 import './App.css';
 
 function App() {
     const [search, setSearch] = useState('');
-    const [data, setData] = useState<VersionData>();
+    const [data, setData] = useState<LLPkgStore>();
     const [itemOffset, setItemOffset] = useState(0);
     const searchQuery = getSearchParams('search');
-    const pageSize = 10;
+    const pageSize = paginationSize.pkg;
     const searchResult = useMemo(
-        () => titleParser(data, search, itemOffset, pageSize),
+        () => pkgnameParser(data, search, itemOffset, pageSize),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [data, search, itemOffset],
     );
     useEffect(() => {
@@ -56,7 +58,7 @@ function App() {
                 pageSize={pageSize}
                 setItemOffset={setItemOffset}
                 itemOffset={itemOffset}
-                className="pb-6"
+                className="pb-12"
             />
         </>
     );
